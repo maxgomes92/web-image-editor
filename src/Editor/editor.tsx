@@ -10,29 +10,26 @@ export const Editor = () => {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const loadAndImportImage = useCallback(
-    (file: File) => {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const img = new Image();
-        img.onload = () => {
-          const newImage: ImageElement = {
-            id: `image-${Date.now()}`,
-            image: img,
-            x: 50,
-            y: 50,
-            width: img.width,
-            height: img.height,
-          };
-          setImages([...images, newImage]);
-          setSelectedId(newImage.id);
+  const loadAndImportImage = useCallback((file: File) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const newImage: ImageElement = {
+          id: `image-${Date.now()}`,
+          image: img,
+          x: 50,
+          y: 50,
+          width: img.width,
+          height: img.height,
         };
-        img.src = event.target?.result as string;
+        setImages((prevImages) => [...prevImages, newImage]);
+        setSelectedId(newImage.id);
       };
-      reader.readAsDataURL(file);
-    },
-    [images]
-  );
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  }, []);
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
@@ -82,7 +79,7 @@ export const Editor = () => {
         onClick={() => fileInputRef.current?.click()}
         className="absolute top-4 left-4 z-10 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition shadow-lg"
       >
-        Import image
+        Click or drop to import 🤙
       </button>
 
       <Stage
