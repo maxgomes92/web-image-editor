@@ -1,36 +1,55 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { Stage, Layer } from "react-konva";
 import Konva from "konva";
 import type { ImageElement } from "./types";
 import { DraggableImage } from "./draggable-image";
+import { useDropzone } from "react-dropzone";
 
 export const Editor = () => {
   const [images, setImages] = useState<ImageElement[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const loadAndImportImage = useCallback(
+    (file: File) => {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const img = new Image();
+        img.onload = () => {
+          const newImage: ImageElement = {
+            id: `image-${Date.now()}`,
+            image: img,
+            x: 50,
+            y: 50,
+            width: img.width,
+            height: img.height,
+          };
+          setImages([...images, newImage]);
+          setSelectedId(newImage.id);
+        };
+        img.src = event.target?.result as string;
+      };
+      reader.readAsDataURL(file);
+    },
+    [images]
+  );
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      acceptedFiles
+        .filter((file) => file.type.startsWith("image/"))
+        .forEach(loadAndImportImage);
+    },
+    [loadAndImportImage]
+  );
+
+  const { getRootProps, getInputProps } = useDropzone({ onDrop });
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const img = new Image();
-      img.onload = () => {
-        const newImage: ImageElement = {
-          id: `image-${Date.now()}`,
-          image: img,
-          x: 50,
-          y: 50,
-          width: img.width,
-          height: img.height,
-        };
-        setImages([...images, newImage]);
-        setSelectedId(newImage.id);
-      };
-      img.src = event.target?.result as string;
-    };
-    reader.readAsDataURL(file);
+    loadAndImportImage(file);
   };
 
   const handleImageChange = (id: string, newAttrs: Partial<ImageElement>) => {
@@ -50,8 +69,9 @@ export const Editor = () => {
   };
 
   return (
-    <div className="relative w-full h-screen bg-gray-900">
+    <div className="relative w-full h-screen bg-gray-900" {...getRootProps()}>
       <input
+        {...getInputProps()}
         ref={fileInputRef}
         type="file"
         accept="image/*"
