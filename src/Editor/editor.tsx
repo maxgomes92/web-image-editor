@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Stage, Layer, type KonvaNodeEvents } from "react-konva";
 import Konva from "konva";
 import type { ImageElement } from "./types";
@@ -99,6 +99,28 @@ export const Editor = () => {
 
     stage.position(newPos);
   };
+
+  const handleDeleteImage = useCallback(() => {
+    if (selectedId) {
+      setImages((prevImages) =>
+        prevImages.filter((img) => img.id !== selectedId)
+      );
+      setSelectedId(null);
+    }
+  }, [selectedId]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Delete" || e.key === "Backspace") {
+        handleDeleteImage();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [handleDeleteImage]);
 
   return (
     <div className="relative w-full h-screen bg-gray-900" {...getRootProps()}>
