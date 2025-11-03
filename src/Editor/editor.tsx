@@ -1,14 +1,18 @@
 import { useState, useRef, useCallback } from "react";
-import { Stage, Layer } from "react-konva";
+import { Stage, Layer, type KonvaNodeEvents } from "react-konva";
 import Konva from "konva";
 import type { ImageElement } from "./types";
 import { DraggableImage } from "./draggable-image";
 import { useDropzone } from "react-dropzone";
+import type { Stage as StageType } from "konva/lib/Stage";
+
+const SCALE_BY = 1.05; // How much to zoom in and out
 
 export const Editor = () => {
   const [images, setImages] = useState<ImageElement[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const stageRef = useRef<StageType>(null);
 
   const loadAndImportImage = useCallback((file: File) => {
     const reader = new FileReader();
@@ -65,6 +69,37 @@ export const Editor = () => {
     }
   };
 
+  // Reference: https://konvajs.org/docs/sandbox/Zooming_Relative_To_Pointer.html
+  const handleWheel: KonvaNodeEvents["onWheel"] = (e) => {
+    e.evt.preventDefault();
+
+    const stage = stageRef.current!;
+    const oldScale = stage.scaleX();
+    const pointer = stage.getPointerPosition()!;
+
+    const mousePointTo = {
+      x: (pointer.x - stage.x()) / oldScale,
+      y: (pointer.y - stage.y()) / oldScale,
+    };
+
+    let direction = e.evt.deltaY > 0 ? 1 : -1;
+
+    if (e.evt.ctrlKey) {
+      direction = -direction;
+    }
+
+    const newScale = direction > 0 ? oldScale * SCALE_BY : oldScale / SCALE_BY;
+
+    stage.scale({ x: newScale, y: newScale });
+
+    const newPos = {
+      x: pointer.x - mousePointTo.x * newScale,
+      y: pointer.y - mousePointTo.y * newScale,
+    };
+
+    stage.position(newPos);
+  };
+
   return (
     <div className="relative w-full h-screen bg-gray-900" {...getRootProps()}>
       <input
@@ -87,6 +122,8 @@ export const Editor = () => {
         height={window.innerHeight}
         onMouseDown={handleStageClick}
         onTouchStart={handleStageClick}
+        onWheel={handleWheel}
+        ref={stageRef}
       >
         <Layer>
           {images.map((img) => (
