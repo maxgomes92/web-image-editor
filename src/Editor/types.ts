@@ -5,4 +5,5 @@ export interface ImageElement {
   y: number;
   width: number;
   height: number;
+  rotation: number;
 }

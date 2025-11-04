@@ -6,7 +6,7 @@ import { DraggableImage } from "./draggable-image";
 import { useDropzone } from "react-dropzone";
 import type { Stage as StageType } from "konva/lib/Stage";
 import { Toolbar, ToolbarButton } from "./toolbar";
-import { Download, Import, Trash2 } from "lucide-react";
+import { Download, Import, RotateCcw, RotateCw, Trash2 } from "lucide-react";
 import { downloadURI } from "./utils";
 
 const SCALE_BY = 1.05; // How much to zoom in and out
@@ -29,6 +29,7 @@ export const Editor = () => {
           y: 50,
           width: img.width,
           height: img.height,
+          rotation: 0,
         };
         setImages((prevImages) => [...prevImages, newImage]);
         setSelectedId(newImage.id);
@@ -130,6 +131,22 @@ export const Editor = () => {
     downloadURI(uri, "image.png");
   };
 
+  const handleRotate = (angle: number) => () => {
+    if (!selectedId) return;
+
+    setImages((prevImages) =>
+      prevImages.map((img) => {
+        if (img.id !== selectedId) {
+          return img;
+        }
+
+        img.rotation = img.rotation + angle / 2; // Not sure why but dividing by 2 gives correct rotation (???)
+
+        return img;
+      })
+    );
+  };
+
   return (
     <div className="relative w-full h-screen bg-gray-900" {...getRootProps()}>
       <input
@@ -167,6 +184,7 @@ export const Editor = () => {
               width={img.width}
               height={img.height}
               isSelected={img.id === selectedId}
+              rotation={img.rotation}
               onSelect={() => setSelectedId(img.id)}
               onChange={(newAttrs) => handleImageChange(img.id, newAttrs)}
             />
@@ -183,17 +201,28 @@ export const Editor = () => {
 
         <ToolbarButton Icon={Download} label="Export" onClick={handleExport} />
 
-        {selectedId && (
-          <>
-            <div className="border" />
+        <div className="border" />
 
-            <ToolbarButton
-              Icon={Trash2}
-              label="Delete"
-              onClick={handleDeleteImage}
-            />
-          </>
-        )}
+        <ToolbarButton
+          disabled={!selectedId}
+          Icon={RotateCcw}
+          label="Rotate -45°"
+          onClick={handleRotate(-45)}
+        />
+
+        <ToolbarButton
+          disabled={!selectedId}
+          Icon={RotateCw}
+          label="Rotate 45°"
+          onClick={handleRotate(45)}
+        />
+
+        <ToolbarButton
+          disabled={!selectedId}
+          Icon={Trash2}
+          label="Delete"
+          onClick={handleDeleteImage}
+        />
       </Toolbar>
     </div>
   );

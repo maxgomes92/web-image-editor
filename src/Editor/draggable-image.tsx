@@ -12,6 +12,7 @@ export interface DraggableImageProps {
   isSelected: boolean;
   onSelect: () => void;
   onChange: (attrs: Partial<ImageElement>) => void;
+  rotation: number;
 }
 
 export const DraggableImage = ({
@@ -23,6 +24,7 @@ export const DraggableImage = ({
   isSelected,
   onSelect,
   onChange,
+  rotation,
 }: DraggableImageProps) => {
   const imageRef = useRef<Konva.Image>(null);
   const transformerRef = useRef<Konva.Transformer>(null);
@@ -43,9 +45,14 @@ export const DraggableImage = ({
         y={y}
         width={width}
         height={height}
+        offset={{
+          x: width / 2,
+          y: height / 2,
+        }}
         draggable
         onClick={onSelect}
         onTap={onSelect}
+        rotation={rotation}
         onDragEnd={(e) => {
           onChange({
             x: e.target.x(),
