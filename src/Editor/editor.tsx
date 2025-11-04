@@ -6,7 +6,8 @@ import { DraggableImage } from "./draggable-image";
 import { useDropzone } from "react-dropzone";
 import type { Stage as StageType } from "konva/lib/Stage";
 import { Toolbar, ToolbarButton } from "./toolbar";
-import { Import, Trash2 } from "lucide-react";
+import { Download, Import, Trash2 } from "lucide-react";
+import { downloadURI } from "./utils";
 
 const SCALE_BY = 1.05; // How much to zoom in and out
 
@@ -124,6 +125,11 @@ export const Editor = () => {
     };
   }, [handleDeleteImage]);
 
+  const handleExport = () => {
+    const uri = stageRef.current!.toDataURL();
+    downloadURI(uri, "image.png");
+  };
+
   return (
     <div className="relative w-full h-screen bg-gray-900" {...getRootProps()}>
       <input
@@ -175,9 +181,12 @@ export const Editor = () => {
           onClick={() => fileInputRef.current?.click()}
         />
 
+        <ToolbarButton Icon={Download} label="Export" onClick={handleExport} />
+
         {selectedId && (
           <>
             <div className="border" />
+
             <ToolbarButton
               Icon={Trash2}
               label="Delete"
