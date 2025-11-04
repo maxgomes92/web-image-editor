@@ -25,8 +25,8 @@ export const Editor = () => {
         const newImage: ImageElement = {
           id: `image-${Date.now()}`,
           image: img,
-          x: 50,
-          y: 50,
+          x: window.innerWidth / 2,
+          y: window.innerHeight / 2,
           width: img.width,
           height: img.height,
           rotation: 0,
@@ -196,7 +196,10 @@ export const Editor = () => {
         <ToolbarButton
           Icon={Import}
           label="Import"
-          onClick={() => fileInputRef.current?.click()}
+          onClick={() => {
+            fileInputRef.current?.click();
+            fileInputRef.current!.value = "";
+          }}
         />
 
         <ToolbarButton Icon={Download} label="Export" onClick={handleExport} />
