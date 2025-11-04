@@ -5,6 +5,7 @@ import type { ImageElement } from "./types";
 import { DraggableImage } from "./draggable-image";
 import { useDropzone } from "react-dropzone";
 import type { Stage as StageType } from "konva/lib/Stage";
+import { Toolbar } from "./toolbar";
 
 const SCALE_BY = 1.05; // How much to zoom in and out
 
@@ -163,6 +164,8 @@ export const Editor = () => {
           ))}
         </Layer>
       </Stage>
+
+      <Toolbar />
     </div>
   );
 };
