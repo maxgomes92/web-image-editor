@@ -5,7 +5,8 @@ import type { ImageElement } from "./types";
 import { DraggableImage } from "./draggable-image";
 import { useDropzone } from "react-dropzone";
 import type { Stage as StageType } from "konva/lib/Stage";
-import { Toolbar } from "./toolbar";
+import { Toolbar, ToolbarButton } from "./toolbar";
+import { Import, Trash2 } from "lucide-react";
 
 const SCALE_BY = 1.05; // How much to zoom in and out
 
@@ -133,12 +134,14 @@ export const Editor = () => {
         onChange={handleImageUpload}
         className="hidden"
       />
-      <button
-        onClick={() => fileInputRef.current?.click()}
-        className="absolute top-4 left-4 z-10 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition shadow-lg"
-      >
-        Click or drop to import 🤙
-      </button>
+
+      {images.length === 0 && (
+        <div className=" absolute top-2/5 left-0 right-0">
+          <p className="text-center text-gray-200 text-lg">
+            Drop an image to start editing 😊
+          </p>
+        </div>
+      )}
 
       <Stage
         width={window.innerWidth}
@@ -165,7 +168,24 @@ export const Editor = () => {
         </Layer>
       </Stage>
 
-      <Toolbar />
+      <Toolbar>
+        <ToolbarButton
+          Icon={Import}
+          label="Import"
+          onClick={() => fileInputRef.current?.click()}
+        />
+
+        {selectedId && (
+          <>
+            <div className="border" />
+            <ToolbarButton
+              Icon={Trash2}
+              label="Delete"
+              onClick={handleDeleteImage}
+            />
+          </>
+        )}
+      </Toolbar>
     </div>
   );
 };
